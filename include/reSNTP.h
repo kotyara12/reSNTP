@@ -13,7 +13,12 @@
 extern "C" {
 #endif
 
-bool sntpRegister();
+void sntpStartSNTP();
+void sntpStopSNTP();
+
+bool sntpTaskCreate(bool createSuspended);
+
+bool sntpEventHandlerRegister();
 
 #ifdef __cplusplus
 }
