@@ -1,6 +1,7 @@
 #include <sys/time.h> 
 #include "esp_sntp.h"
 #include "project_config.h"
+#include "def_sntp.h"
 #include "rLog.h"
 #include "reSNTP.h"
 #include "reEvents.h"
