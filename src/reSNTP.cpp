@@ -21,9 +21,11 @@ void sntpSyncNotification(struct timeval *tv)
   time(&now);
   localtime_r(&now, &timeinfo);
   if (timeinfo.tm_year < (1970 - 1900)) {
+    sntp_set_sync_interval(CONFIG_SNTP_DELAY_FAILED);
     rlog_e(logTAG, "Time synchronization failed!");
   }
   else {
+    sntp_set_sync_interval(CONFIG_SNTP_DELAY_NORMAL);
     strftime(strftime_buf, sizeof(strftime_buf), "%d.%m.%Y %H:%M:%S", &timeinfo);
     rlog_i(logTAG, "Time synchronization completed, current time: %s", strftime_buf);
     eventLoopPost(RE_TIME_EVENTS, RE_TIME_SNTP_SYNC_OK, nullptr, 0, portMAX_DELAY);
@@ -66,6 +68,7 @@ void sntpStartSNTP()
   sntp_setservername(4, (char*)CONFIG_SNTP_SERVER4);
   #endif
   sntp_set_time_sync_notification_cb(sntpSyncNotification); 
+  sntp_set_sync_interval(CONFIG_SNTP_DELAY_FAILED);
 
   sntp_init();
 
