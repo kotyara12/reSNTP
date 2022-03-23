@@ -14,21 +14,31 @@ static const char * logTAG = "SNTP";
 
 void sntpSyncNotification(struct timeval *tv)
 {
-  time_t now = 0;
   struct tm timeinfo;
+  #if CONFIG_RLOG_PROJECT_LEVEL >= RLOG_LEVEL_INFO
   char strftime_buf[20];
+  #endif // CONFIG_RLOG_PROJECT_LEVEL
 
-  time(&now);
-  localtime_r(&now, &timeinfo);
+  localtime_r(&tv->tv_sec, &timeinfo);
   if (timeinfo.tm_year < (1970 - 1900)) {
     sntp_set_sync_interval(CONFIG_SNTP_DELAY_FAILED);
     rlog_e(logTAG, "Time synchronization failed!");
   }
   else {
+    // Set timezone
+    #if defined(CONFIG_SNTP_TIMEZONE)
+    setenv("TZ", CONFIG_SNTP_TIMEZONE, 1);
+    tzset(); 
+    #endif
+    // Notification
+    eventLoopPost(RE_TIME_EVENTS, RE_TIME_SNTP_SYNC_OK, nullptr, 0, portMAX_DELAY);
+    // Set interval
     sntp_set_sync_interval(CONFIG_SNTP_DELAY_NORMAL);
+    // Log
+    #if CONFIG_RLOG_PROJECT_LEVEL >= RLOG_LEVEL_INFO
     strftime(strftime_buf, sizeof(strftime_buf), "%d.%m.%Y %H:%M:%S", &timeinfo);
     rlog_i(logTAG, "Time synchronization completed, current time: %s", strftime_buf);
-    eventLoopPost(RE_TIME_EVENTS, RE_TIME_SNTP_SYNC_OK, nullptr, 0, portMAX_DELAY);
+    #endif // CONFIG_RLOG_PROJECT_LEVEL
   };
 }
 
@@ -48,10 +58,6 @@ void sntpStartSNTP()
   // Configuring synchronization parameters
   sntp_setoperatingmode(SNTP_OPMODE_POLL);
   sntp_set_sync_mode(SNTP_SYNC_MODE_IMMED);
-  #if defined(CONFIG_SNTP_TIMEZONE)
-  setenv("TZ", CONFIG_SNTP_TIMEZONE, 1);
-  tzset(); 
-  #endif
   #if defined(CONFIG_SNTP_SERVER0)
   sntp_setservername(0, (char*)CONFIG_SNTP_SERVER0);
   #endif
