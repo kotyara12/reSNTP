@@ -116,6 +116,7 @@ static void sntpWiFiEventHandler(void* arg, esp_event_base_t event_base, int32_t
 
 bool sntpEventHandlerRegister()
 {
+  rlog_d(logTAG, "Register SNTP event handlers...");
   return eventHandlerRegister(RE_WIFI_EVENTS, ESP_EVENT_ANY_ID, &sntpWiFiEventHandler, nullptr);
 }
 

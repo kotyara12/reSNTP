@@ -1,7 +1,7 @@
 {
-  "name": "reEvents",
-  "version": "3.0.0",
-  "description": "Launcher for automatic time synchronization with SNTP servers.",
+  "name": "reSNTP",
+  "version": "1.2.0",
+  "description": "Launcher for automatic time synchronization with SNTP servers",
   "keywords": "sntp",
   "authors":
   [
