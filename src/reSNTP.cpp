@@ -16,7 +16,7 @@ void sntpSyncNotification(struct timeval *tv)
 {
   struct tm timeinfo;
   #if CONFIG_RLOG_PROJECT_LEVEL >= RLOG_LEVEL_INFO
-  char strftime_buf[20];
+    char strftime_buf[20];
   #endif // CONFIG_RLOG_PROJECT_LEVEL
 
   localtime_r(&tv->tv_sec, &timeinfo);
