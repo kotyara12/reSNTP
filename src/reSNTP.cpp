@@ -44,8 +44,8 @@ void sntpSyncNotification(struct timeval *tv)
 
 void sntpStopSNTP()
 {
-  if (sntp_enabled()) {
-    sntp_stop();
+  if (esp_sntp_enabled()) {
+    esp_sntp_stop();
     rlog_i(logTAG, "Time synchronization stopped");
   };
 }
@@ -56,29 +56,29 @@ void sntpStartSNTP()
   sntpStopSNTP();
 
   // Configuring synchronization parameters
-  sntp_setoperatingmode(SNTP_OPMODE_POLL);
-  sntp_set_sync_mode(SNTP_SYNC_MODE_IMMED);
+  esp_sntp_setoperatingmode(ESP_SNTP_OPMODE_POLL);
+  esp_sntp_set_sync_mode(SNTP_SYNC_MODE_IMMED);
   #if defined(CONFIG_SNTP_SERVER0)
-  sntp_setservername(0, (char*)CONFIG_SNTP_SERVER0);
+  esp_sntp_setservername(0, (char*)CONFIG_SNTP_SERVER0);
   #endif
   #if defined(CONFIG_SNTP_SERVER1)
-  sntp_setservername(1, (char*)CONFIG_SNTP_SERVER1);
+  esp_sntp_setservername(1, (char*)CONFIG_SNTP_SERVER1);
   #endif
   #if defined(CONFIG_SNTP_SERVER2)
-  sntp_setservername(2, (char*)CONFIG_SNTP_SERVER2);
+  esp_sntp_setservername(2, (char*)CONFIG_SNTP_SERVER2);
   #endif
   #if defined(CONFIG_SNTP_SERVER3)
-  sntp_setservername(3, (char*)CONFIG_SNTP_SERVER3);
+  esp_sntp_setservername(3, (char*)CONFIG_SNTP_SERVER3);
   #endif
   #if defined(CONFIG_SNTP_SERVER4)
-  sntp_setservername(4, (char*)CONFIG_SNTP_SERVER4);
+  esp_sntp_setservername(4, (char*)CONFIG_SNTP_SERVER4);
   #endif
-  sntp_set_time_sync_notification_cb(sntpSyncNotification); 
-  sntp_set_sync_interval(CONFIG_SNTP_DELAY_FAILED);
+  esp_sntp_set_time_sync_notification_cb(sntpSyncNotification); 
+  esp_sntp_set_sync_interval(CONFIG_SNTP_DELAY_FAILED);
 
-  sntp_init();
+  esp_sntp_init();
 
-  if (sntp_enabled()) {
+  if (esp_sntp_enabled()) {
     rlog_i(logTAG, "Starting time synchronization with SNTP servers for a zone %s...", CONFIG_SNTP_TIMEZONE);
   } else {
     rlog_e(logTAG, "Failed to start time synchronization with SNTP servers!");
@@ -91,7 +91,7 @@ bool sntpTaskCreate(bool createSuspended)
     return sntpEventHandlerRegister();
   } else {
     sntpStartSNTP();
-    return sntp_enabled();
+    return esp_sntp_enabled();
   };
 }
 
@@ -103,7 +103,7 @@ static void sntpWiFiEventHandler(void* arg, esp_event_base_t event_base, int32_t
 {
   // STA connected and Internet access is available
   if (event_id == RE_WIFI_STA_PING_OK) {
-    if (!sntp_enabled()) {
+    if (!esp_sntp_enabled()) {
       sntpStartSNTP();
     };
   }
