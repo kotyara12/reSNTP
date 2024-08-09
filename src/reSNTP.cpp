@@ -5,6 +5,7 @@
 #include "rLog.h"
 #include "reSNTP.h"
 #include "reEvents.h"
+#include "reStates.h"
 
 static const char * logTAG = "SNTP";
 
@@ -102,15 +103,19 @@ bool sntpTaskCreate(bool createSuspended)
 static void sntpWiFiEventHandler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data)
 {
   // STA connected and Internet access is available
-  if (event_id == RE_WIFI_STA_PING_OK) {
+  if (event_id == RE_INET_PING_OK) {
     if (!esp_sntp_enabled()) {
       sntpStartSNTP();
     };
   }
 
   // STA disconnected or Internet access lost
-  else if ((event_id == RE_WIFI_STA_PING_FAILED) || (event_id == RE_WIFI_STA_DISCONNECTED) || (event_id == RE_WIFI_STA_STOPPED)) {
-    sntpStopSNTP();
+  else if ((event_id == RE_INET_PING_FAILED) 
+        || (event_id == RE_WIFI_STA_DISCONNECTED) || (event_id == RE_WIFI_STA_STOPPED)
+        || (event_id == RE_ETHERNET_DISCONNECTED) || (event_id == RE_ETHERNET_STOPPED)) {
+    if (!statesInetIsAvailabled()) {
+      sntpStopSNTP();
+    };
   }
 }
 
